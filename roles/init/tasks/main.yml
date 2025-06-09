@@ -1,0 +1,29 @@
+---
+# tasks file for roles/init
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: lx.localdomain
+
+- name: Dnf update - cron
+  ansible.builtin.cron:
+    name: dnf-update-cron
+    minute: "0"
+    job: dnf -y update
+
+- name: Install tools
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - firewalld
+    - make
+    - vim
+    - jq
+    - "@development"
+    - "@Server with GUI"
+
+- name: Start firewalld
+  ansible.builtin.systemd_service:
+    name: firewalld
+    enabled: true
+    state: started

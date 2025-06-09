@@ -1,0 +1,24 @@
+# tasks file for roles/nginx
+---
+- name: Configure firewalld for HTTP
+  ansible.posix.firewalld:
+    service: http
+    permanent: true
+    state: enabled
+
+- name: Reload firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
+
+- name: Install nginx package
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+- name: Restart nginx service
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: restarted
+    enabled: true
+    daemon_reload: true

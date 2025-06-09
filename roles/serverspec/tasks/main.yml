@@ -1,0 +1,33 @@
+---
+# Tasks file for the Serverspec role
+- name: Install ruby
+  ansible.builtin.dnf:
+    name: ruby
+    state: present
+
+- name: Install Serverspec
+  community.general.gem:
+    name: "{{ item }}"
+    executable: /usr/bin/gem
+    user_install: false
+  with_items:
+    - rake
+    - serverspec
+
+- name: Mount Samba share on /mnt
+  ansible.posix.mount:
+    path: /mnt
+    src: //localhost/share
+    fstype: cifs
+    opts: username=user,password=user,iocharset=utf8
+    state: mounted
+
+- name: Run Serverspec tests
+  ansible.builtin.shell: /bin/bash -lc "cd serverspec && /usr/local/bin/rake"
+  register: result
+  changed_when: result.rc != 0
+
+- name: Unmount smb share
+  ansible.posix.mount:
+    path: /mnt
+    state: unmounted

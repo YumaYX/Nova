@@ -1,0 +1,12 @@
+---
+- name: Init
+  hosts: all
+  vars:
+    prime_user: user
+  roles:
+    - init
+    - user
+    - samba
+    - nginx
+    - ruby
+    - serverspec

@@ -1,0 +1,60 @@
+---
+# tasks file for roles/user
+- name: Create user
+  ansible.builtin.user:
+    name: "{{ prime_user }}"
+    shell: /bin/bash
+
+- name: Sudo
+  ansible.builtin.template:
+    src: templates/sudo.j2
+    dest: /etc/sudoers.d/{{ prime_user }}
+    owner: root
+    group: root
+    mode: "0440"
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /home/{{ prime_user }}/.ssh
+    state: directory
+    owner: "{{ prime_user }}"
+    group: "{{ prime_user }}"
+    mode: "0700"
+
+- name: Check if SSH key exists
+  ansible.builtin.stat:
+    path: /home/{{ prime_user }}/.ssh/id_ed25519
+  register: file_status
+
+- name: Generate ED25519 SSH key
+  community.crypto.openssh_keypair:
+    path: /home/{{ prime_user }}/.ssh/id_ed25519
+    type: ed25519
+    passphrase: ""
+  become: true
+  become_user: "{{ prime_user }}"
+  when: not file_status.stat.exists
+
+- name: Change Keys Owner
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ prime_user }}"
+    group: "{{ prime_user }}"
+    mode: "0600"
+  with_items:
+    - /home/{{ prime_user }}/.ssh/id_ed25519
+    - /home/{{ prime_user }}/.ssh/id_ed25519.pub
+
+- name: Git clone # noqa latest[git]
+  ansible.builtin.git:
+    repo: https://github.com/YumaYX/dotfiles.git
+    dest: /home/{{ prime_user }}/dotfiles
+  become: true
+  become_user: "{{ prime_user }}"
+
+- name: Run 'install' target as {{ prime_user }}
+  community.general.make:
+    chdir: /home/{{ prime_user }}/dotfiles
+    target: install
+  become: true
+  become_user: "{{ prime_user }}"
