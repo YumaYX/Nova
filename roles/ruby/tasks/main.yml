@@ -33,7 +33,7 @@
   ansible.builtin.git:
     repo: https://github.com/rbenv/rbenv.git
     dest: /home/{{ prime_user }}/.rbenv
-    version: 0f65ff7
+    version: "0f65ff7"
   become: true
   become_user: "{{ prime_user }}"
 
