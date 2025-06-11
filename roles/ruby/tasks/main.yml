@@ -33,6 +33,7 @@
   ansible.builtin.git:
     repo: https://github.com/rbenv/rbenv.git
     dest: /home/{{ prime_user }}/.rbenv
+    version: 0f65ff7
     update: true
   become: true
   become_user: "{{ prime_user }}"
@@ -42,6 +43,7 @@
     repo: https://github.com/rbenv/ruby-build.git
     dest: /home/{{ prime_user }}/.rbenv/plugins/ruby-build
     update: true
+    version: 1195268
   become: true
   become_user: "{{ prime_user }}"
 
